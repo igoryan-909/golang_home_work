@@ -1,4 +1,4 @@
-module github.com/fixme_my_friend/hw02_unpack_string
+module github.com/igoryan-909/golang_home_work/hw02_unpack_string
 
 go 1.18
 

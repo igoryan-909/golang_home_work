@@ -14,34 +14,38 @@ func Unpack(str string) (string, error) {
 	strBuilder := strings.Builder{}
 	isChar := true
 	escaped := false
-	for pos, r := range str {
+	strLen := len([]rune(str))
+	for pos, r := range []rune(str) {
 		isIndex := unicode.IsDigit(r) && !escaped
 		currStr := string(r)
 		prevStr := string(prevRune)
 
-		if !escaped && currStr == "\\" {
+		switch {
+		case !escaped && currStr == "\\":
 			escaped = true
 			isChar = false
 			continue
-		}
-		if escaped && !(unicode.IsDigit(r) || currStr == "\\") {
+		case escaped && !(unicode.IsDigit(r) || currStr == "\\"):
 			return "", ErrInvalidString
-		} else if escaped {
+		case escaped:
 			prevRune = r
 			escaped = false
 			isChar = true
 			strBuilder.WriteString(prevStr)
-			if pos == len(str)-1 {
+			if pos == strLen-1 {
 				strBuilder.WriteString(currStr)
 			}
 			continue
 		}
+
 		if isIndex && (prevRune == 0 || (unicode.IsDigit(prevRune) && !isChar)) {
 			return "", ErrInvalidString
-		}
-		if isIndex {
+		} else if isIndex {
 			isChar = false
-			count, _ := strconv.Atoi(currStr)
+			count, err := strconv.Atoi(currStr)
+			if err != nil {
+				return "", err
+			}
 			strBuilder.WriteString(strings.Repeat(prevStr, count))
 			prevRune = r
 			continue
@@ -50,7 +54,7 @@ func Unpack(str string) (string, error) {
 			strBuilder.WriteString(prevStr)
 		}
 		prevRune = r
-		if pos == len(str)-1 {
+		if pos == strLen-1 {
 			strBuilder.WriteString(currStr)
 		}
 	}
